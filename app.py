@@ -42,8 +42,28 @@ st.markdown(
 )
 
 # TensorFlow Model Prediction
+import zipfile
+import os
+import tempfile
+
+# Set the permanent path to your model zip file
+model_zip_path = 'trained_model.keras.zip'
+
+# Only proceed if the model file exists at the specified path
+if os.path.exists(model_zip_path):
+    with zipfile.ZipFile(model_zip_path, 'r') as myzipfile:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            myzipfile.extractall(tmp_dir)
+            root_folder = myzipfile.namelist()[0]  # e.g., "model.h5py"
+            model_dir = os.path.join(tmp_dir, root_folder)
+
+            # Your code to load the model from model_dir
+            # Example: model = tf.keras.models.load_model(model_dir)
+else:
+    print("Model zip file not found at specified path.")
+
 def model_prediction(test_image):
-    cnn = tf.keras.models.load_model("trained_model.keras")
+    cnn = tf.keras.models.load_model(model_dir)
     image_bytes = test_image.read()  # Read the uploaded image file once
     image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))  # Open and resize the image
     input_arr = np.array(image)
