@@ -43,7 +43,7 @@ st.markdown(
 
 # TensorFlow Model Prediction
 def model_prediction(test_image):
-    cnn = load_model("trained_model.keras")
+    cnn = tf.keras.models.load_model("trained_model.keras")
     image_bytes = test_image.read()  # Read the uploaded image file once
     image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))  # Open and resize the image
     input_arr = np.array(image)
@@ -64,7 +64,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # Display uploaded image and prediction
 if test_image is not None:
-    st.image(test_image, caption="Uploaded Image", width=300)
+    st.image(test_image, caption="Uploaded Image", width=500)
 
     # Predict button with padding
     if st.button("🔍 Predict Disease"):
