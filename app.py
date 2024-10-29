@@ -3,7 +3,8 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
-
+import keras
+import os
 # Customize page layout and title
 st.set_page_config(page_title="🌿 Plant Disease Recognition System", layout="centered")
 st.markdown(
@@ -43,7 +44,8 @@ st.markdown(
 
 # TensorFlow Model Prediction
 def model_prediction(test_image):
-    cnn = tf.keras.models.load_model("trained_model.h5")
+    absolute_path = os.path.join(os.getcwd(), 'trained_model.h5')
+    cnn = tf.keras.models.load_model(absolute_path)
     image_bytes = test_image.read()  # Read the uploaded image file once
     image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))  # Open and resize the image
     input_arr = np.array(image)
@@ -51,7 +53,6 @@ def model_prediction(test_image):
     predictions = cnn.predict(input_arr)
     result_index = np.argmax(predictions)
     return result_index  # return index of max element
-
 # Header
 st.markdown('<h1 class="main-header">Plant Disease Recognition System 🌱</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Detect plant diseases accurately and swiftly</p>', unsafe_allow_html=True)
