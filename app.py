@@ -64,7 +64,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # Display uploaded image and prediction
 if test_image is not None:
-    st.image(test_image, caption="Uploaded Image", width=300)
+    st.image(test_image, caption="Uploaded Image", width=500)
 
     # Predict button with padding
     if st.button("🔍 Predict Disease"):
