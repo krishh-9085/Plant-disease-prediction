@@ -43,7 +43,7 @@ st.markdown(
 
 # TensorFlow Model Prediction
 def model_prediction(test_image):
-    cnn = tf.keras.models.load_model("trained_model.keras")
+    cnn = load_model("trained_model.keras")
     image_bytes = test_image.read()  # Read the uploaded image file once
     image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))  # Open and resize the image
     input_arr = np.array(image)
