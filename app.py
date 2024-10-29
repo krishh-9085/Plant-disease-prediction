@@ -3,6 +3,8 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
+import requests
+import tempfile
 
 # Customize page layout and title
 st.set_page_config(page_title="🌿 Plant Disease Recognition System", layout="centered")
@@ -41,29 +43,24 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
+# GitHub raw URL for the .keras model file
+model_url = 'https://github.com/krishh-9085/Plant-disease-prediction/blob/main/trained_model.keras'
+
+# Function to load model from GitHub
+@st.cache_resource  # Cache the model to avoid re-downloading each run
+def load_model_from_github(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Ensure the request was successful
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".keras") as tmp_file:
+        tmp_file.write(response.content)
+        tmp_file_path = tmp_file.name
+
+    return tf.keras.models.load_model(tmp_file_path)
+
 # TensorFlow Model Prediction
-import zipfile
-import os
-import tempfile
-
-# Set the permanent path to your model zip file
-model_zip_path = 'trained_model.keras.zip'
-
-# Only proceed if the model file exists at the specified path
-if os.path.exists(model_zip_path):
-    with zipfile.ZipFile(model_zip_path, 'r') as myzipfile:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            myzipfile.extractall(tmp_dir)
-            root_folder = myzipfile.namelist()[0]  # e.g., "model.h5py"
-            model_dir = os.path.join(tmp_dir, root_folder)
-
-            # Your code to load the model from model_dir
-            # Example: model = tf.keras.models.load_model(model_dir)
-else:
-    print("Model zip file not found at specified path.")
-
 def model_prediction(test_image):
-    cnn = tf.keras.models.load_model(model_dir)
+    cnn = load_model_from_github(model_url)  # Load the model from GitHub
     image_bytes = test_image.read()  # Read the uploaded image file once
     image = Image.open(io.BytesIO(image_bytes)).resize((128, 128))  # Open and resize the image
     input_arr = np.array(image)
@@ -91,44 +88,20 @@ if test_image is not None:
         result_index = model_prediction(test_image)
         
         # Labels for plant diseases
-        class_name=['Apple___Apple_scab',
- 'Apple___Black_rot',
- 'Apple___Cedar_apple_rust',
- 'Apple___healthy',
- 'Blueberry___healthy',
- 'Cherry_(including_sour)___Powdery_mildew',
- 'Cherry_(including_sour)___healthy',
- 'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
- 'Corn_(maize)___Common_rust_',
- 'Corn_(maize)___Northern_Leaf_Blight',
- 'Corn_(maize)___healthy',
- 'Grape___Black_rot',
- 'Grape___Esca_(Black_Measles)',
- 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)',
- 'Grape___healthy',
- 'Orange___Haunglongbing_(Citrus_greening)',
- 'Peach___Bacterial_spot',
- 'Peach___healthy',
- 'Pepper,_bell___Bacterial_spot',
- 'Pepper,_bell___healthy',
- 'Potato___Early_blight',
- 'Potato___Late_blight',
- 'Potato___healthy',
- 'Raspberry___healthy',
- 'Soybean___healthy',
- 'Squash___Powdery_mildew',
- 'Strawberry___Leaf_scorch',
- 'Strawberry___healthy',
- 'Tomato___Bacterial_spot',
- 'Tomato___Early_blight',
- 'Tomato___Late_blight',
- 'Tomato___Leaf_Mold',
- 'Tomato___Septoria_leaf_spot',
- 'Tomato___Spider_mites Two-spotted_spider_mite',
- 'Tomato___Target_Spot',
- 'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
- 'Tomato___Tomato_mosaic_virus',
- 'Tomato___healthy']
+        class_name = [
+            'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy',
+            'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy',
+            'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_',
+            'Corn_(maize)___Northern_Leaf_Blight', 'Corn_(maize)___healthy', 'Grape___Black_rot',
+            'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Grape___healthy',
+            'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___healthy',
+            'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 'Potato___Early_blight',
+            'Potato___Late_blight', 'Potato___healthy', 'Raspberry___healthy', 'Soybean___healthy',
+            'Squash___Powdery_mildew', 'Strawberry___Leaf_scorch', 'Strawberry___healthy', 'Tomato___Bacterial_spot',
+            'Tomato___Early_blight', 'Tomato___Late_blight', 'Tomato___Leaf_Mold', 'Tomato___Septoria_leaf_spot',
+            'Tomato___Spider_mites Two-spotted_spider_mite', 'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
+            'Tomato___Tomato_mosaic_virus', 'Tomato___healthy'
+        ]
 
         # Display prediction with custom style
         st.markdown('<div class="prediction-box">🌿 Prediction: {}</div>'.format(class_name[result_index]), unsafe_allow_html=True)
